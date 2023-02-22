@@ -1,0 +1,151 @@
+---
+title: "Untitled"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+
+```{r setup, include=FALSE}
+pacman::p_load(rio, here, tidyverse, maps, mapdata, ggthemes, ggrepel, rgdal,raster, viridis,sf,terra, colorspace, flexdashboard, plotly,janitor, maptools,ggthemes, viridis)
+```
+
+
+
+# Overview 
+
+Sidebar Title {.sidebar}
+--------------
+
+**General infomation about ECE Programs in Indonesia**
+
+The First Page of this dashboard contains overall nationwide data about Total number of ECE Programs, total number of students enrolled in all ECE programs, total numbers of ECE Teachers and Facilitators, and total number of classrooms. 
+
+*Data source:*
+Data is taken from the 2020/2021 Annual ECE Statistics Report issued by the Ministry of Education and Cultural. This data reflects ECE Programs statistics in Indonesia as off 30 November 2020.
+
+
+-------------
+
+```{r include=FALSE}
+#Load Province name
+name <- import(here("data", "name.xlsx"))
+name$id <- as.character(name$id)
+
+#Load Indonesia shapefile
+idn_shape2 <- rgdal::readOGR(dsn=path.expand("/Users/merlyklaas/Documents/University of Oregon/2022-2023/EDLD 655 Capstone/capstone-project/data/smallest/idn_admbnda_adm1_bps_20200401.shp"),layer = "idn_admbnda_adm1_bps_20200401")
+st_drivers()
+idn_shape_df <- fortify(idn_shape2)
+head(idn_shape_df)
+idn <- left_join(idn_shape_df, name)
+
+#Load ECE Data
+stat <- import(here("data","stat.xlsx")) %>% 
+  clean_names() %>%
+  mutate(across(setdiff(names(select(., where(is.character))), 'province'), as.numeric))
+dat <- left_join(idn, stat)
+
+str(stat)
+```
+
+Column {.tabset data-width=650}
+-----------------------------------------
+
+### Number of ECE Programs
+
+
+
+```{r include=FALSE}
+totece <- dat %>% 
+  ggplot(aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(x=long,y=lat, group=group, fill=institution, text=province), color='black')+
+  scale_fill_continuous_divergingx(palette = "Earth")+
+  ggthemes::theme_map(base_size=8)+
+  theme(strip.background = element_blank(),
+        legend.position ="bottom",
+        legend.direction = "horizontal",
+        legend.title = element_text(size = 6), 
+        legend.text  = element_text(size = 6),
+        legend.key.size = unit(1, "lines"),
+        plot.title.position = "plot",
+        text=element_text(family= "sans"),
+        plot.title = element_text(face="bold"),
+        plot.subtitle = element_text(face="italic"),
+        plot.caption = element_text(color ="gray30",hjust = 0),
+        axis.title = element_text(face = "bold"))+
+  labs(fill = "# of ECE Programs",
+       title = "ECE Programs Availability by Province in Indonesia",
+       subtitle = "Java islands have the highest number of ECE Programs",
+       x="",
+       y="")
+totece
+```
+
+```{r}
+ggplotly(totece)
+```
+
+
+### Students Enrollment
+
+```{r include=FALSE}
+totstu<- dat %>% 
+  ggplot(aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(x=long,y=lat, group=group, fill=participants, text=province), color='black')+
+  scale_fill_continuous_divergingx(palette = "Earth")+
+  ggthemes::theme_map(base_size=8)+
+  theme(strip.background = element_blank(),
+        legend.position ="bottom",
+        legend.direction = "horizontal",
+        legend.title = element_text(size = 6), 
+        legend.text  = element_text(size = 6),
+        legend.key.size = unit(1, "lines"),
+        plot.title.position = "plot",
+        text=element_text(family= "sans"),
+        plot.title = element_text(face="bold"),
+        plot.subtitle = element_text(face="italic"),
+        plot.caption = element_text(color ="gray30",hjust = 0),
+        axis.title = element_text(face = "bold"))+
+  labs(fill = "# of Students Enrolled",
+       title = "Early Childhood Students Enrollment in ECE Program  by Province in Indonesia",
+       subtitle = "Java island has the highest students enrollment in ECE Programs",
+       x="",
+       y="")
+```
+```{r}
+ggplotly(totstu)
+```
+
+### Teacher & Facilitator
+```{r include=FALSE}
+totteach<- dat %>% 
+  ggplot(aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(x=long,y=lat, group=group, fill=teacher_facilitator, text=province), color='black')+
+  scale_fill_continuous_divergingx(palette = "Earth")+
+  ggthemes::theme_map(base_size=8)+
+  theme(strip.background = element_blank(),
+        legend.position ="bottom",
+        legend.direction = "horizontal",
+        legend.title = element_text(size = 6), 
+        legend.text  = element_text(size = 6),
+        legend.key.size = unit(1, "lines"),
+        plot.title.position = "plot",
+        text=element_text(family= "sans"),
+        plot.title = element_text(face="bold"),
+        plot.subtitle = element_text(face="italic"),
+        plot.caption = element_text(color ="gray30",hjust = 0),
+        axis.title = element_text(face = "bold"))+
+  labs(fill = "# of Teacher",
+       title = "Teachers and Facilitors in ECE Program  by Province in Indonesia",
+       subtitle = "Java island has the highest students enrollment in ECE Programs",
+       x="",
+       y="")
+
+```
+
+```{r}
+ggplotly(totteach)
+```
+
+
