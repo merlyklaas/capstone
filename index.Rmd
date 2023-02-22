@@ -168,10 +168,11 @@ And only one type of Formal ECE
 + Kindergarten (Taman Kanak-kanak/ Raudatul Athfal)	for 4-6 years old with priority for 5-6 years old
 
 
-Thus, in Permendikbud 137 year 2014 about National ECE Standards, the government regulates the maximum student per teacher ratio based on children's age
-+ aged 0-2 = 1: 4. 
-+ aged 2-4 = 1: 8
-+ aged 4-6 = 1:15.
+Thus, in Permendikbud 137 year 2014 about National ECE Standards, the government regulates the maximum student per teacher ratio based on children age:
+
++ aged 0-2 = 1:4
++ aged 2-4 = 1:8
++ aged 4-6 = 1:15
 
 
 
