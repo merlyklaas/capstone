@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "The Statistics of Early Childhood Education in Indonesia"
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
@@ -18,7 +18,7 @@ pacman::p_load(rio, here, tidyverse, maps, mapdata, ggthemes, ggrepel, rgdal,ras
 Sidebar Title {.sidebar}
 --------------
 
-**General infomation about ECE Programs in Indonesia**
+**General information about ECE Programs in Indonesia**
 
 The First Page of this dashboard contains overall nationwide data about Total number of ECE Programs, total number of students enrolled in all ECE programs, total numbers of ECE Teachers and Facilitators, and total number of classrooms. 
 
@@ -49,7 +49,7 @@ dat <- left_join(idn, stat)
 str(stat)
 ```
 
-Column {.tabset data-width=650}
+Column {.tabset data-width=700}
 -----------------------------------------
 
 ### Number of ECE Programs
@@ -146,6 +146,168 @@ totteach<- dat %>%
 
 ```{r}
 ggplotly(totteach)
+```
+
+# Student to Teacher Ratio
+
+Sidebar Title {.sidebar}
+--------------
+
+**Student per Teacher Ratio**
+
+The Second Page of this dashboard contains student to teacher ratio by type of ECE Programs aggregated in Province level. There are two main types of ECE Program, Non-formal ECE and Formal ECE. 
+
+There are three types of Non-Formal ECE:
+
++ Daycare *(Tempat Penitipan Anak)* for	0-6 years old with the Priority for 0-4 years old	
++ Playgroup *(Kelompok Bermain)*	for 2-6 years old with Priority for 3-4 years old	
++ Integrated ECE *(Satuan Paud Sejenis)* for	0-6 years old
+
+And only one type of Formal ECE
++ Kindergarten (Taman Kanak-kanak/ Raudatul Athfal)	for 4-6 years old with priority for 5-6 years old
+
+
+Thus, in Permendikbud 137 year 2014 about National ECE Standards, the government regulates the maximum student per teacher ratio based on children's age
++ aged 0-2 = 1: 4. 
++ aged 2-4 = 1: 8
++ aged 4-6 = 1:15.
+
+
+
+*Data source:*
+Data is taken from the 2020/2021 Annual ECE Statistics Report issued by the Ministry of Education and Cultural. This data reflects ECE Programs statistics in Indonesia as off 30 November 2020.
+
+-------------
+
+
+Column {.tabset data-width=700}
+-----------------------------------------
+
+### Kindergarten
+
+```{r}
+
+tkratio<- dat %>% 
+  ggplot(aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(x=long,y=lat, group=group, fill=tk_stu_teacher, text=province), color='black')+
+   scale_fill_viridis_c(option = "magma", direction=-1)+
+  #scale_fill_continuous_divergingx(palette = "Geyser")+
+  ggthemes::theme_map(base_size=8)+
+  theme(strip.background = element_blank(),
+        legend.position ="bottom",
+        legend.direction = "horizontal",
+        legend.title = element_text(size = 6), 
+        legend.text  = element_text(size = 6),
+        legend.key.size = unit(1, "lines"),
+        plot.title.position = "plot",
+        text=element_text(family= "sans"),
+        plot.title = element_text(face="bold"),
+        plot.subtitle = element_text(face="italic"),
+        plot.caption = element_text(color ="gray30",hjust = 0),
+        axis.title = element_text(face = "bold"))+
+  labs(fill = "Ratio",
+       title = "Student to Teacher Ratio in Kindergarten",
+    #   subtitle = "Java island has the highest students enrollment in ECE Programs",
+       x="",
+       y="")
+tkratio
+```
+
+```{r}
+
+```
+
+### Daycare
+
+```{r}
+tparatio<- dat %>% 
+  ggplot(aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(x=long,y=lat, group=group, fill=tpa_stu_teach, text=province), color='black')+
+   scale_fill_viridis_c(option = "magma", direction=-1)+
+  #scale_fill_continuous_divergingx(palette = "Geyser")+
+  ggthemes::theme_map(base_size=8)+
+  theme(strip.background = element_blank(),
+        legend.position ="bottom",
+        legend.direction = "horizontal",
+        legend.title = element_text(size = 6), 
+        legend.text  = element_text(size = 6),
+        legend.key.size = unit(1, "lines"),
+        plot.title.position = "plot",
+        text=element_text(family= "sans"),
+        plot.title = element_text(face="bold"),
+        plot.subtitle = element_text(face="italic"),
+        plot.caption = element_text(color ="gray30",hjust = 0),
+        axis.title = element_text(face = "bold"))+
+  labs(fill = "Ratio",
+       title = "Student to Teacher Ratio in Daycare",
+   #    subtitle = "Java island has the highest students enrollment in ECE Programs",
+       x="",
+       y="")
+```
+```{r}
+ggplotly(tparatio)
+```
+
+### Playgroup
+
+```{r}
+kbratio<- dat %>% 
+  ggplot(aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(x=long,y=lat, group=group, fill=kb_stu_teach, text=province), color='black')+
+   scale_fill_viridis_c(option = "magma", direction=-1)+
+  #scale_fill_continuous_divergingx(palette = "Geyser")+
+  ggthemes::theme_map(base_size=8)+
+  theme(strip.background = element_blank(),
+        legend.position ="bottom",
+        legend.direction = "horizontal",
+        legend.title = element_text(size = 6), 
+        legend.text  = element_text(size = 6),
+        legend.key.size = unit(1, "lines"),
+        plot.title.position = "plot",
+        text=element_text(family= "sans"),
+        plot.title = element_text(face="bold"),
+        plot.subtitle = element_text(face="italic"),
+        plot.caption = element_text(color ="gray30",hjust = 0),
+        axis.title = element_text(face = "bold"))+
+  labs(fill = "Ratio",
+       title = "Student to Teacher Ratio in Playgroup",
+   #    subtitle = "Java island has the highest students enrollment in ECE Programs",
+       x="",
+       y="")
+```
+```{r}
+ggplotly(kbratio)
+```
+
+### Integrated ECE
+
+```{r}
+spsratio<- dat %>% 
+  ggplot(aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(x=long,y=lat, group=group, fill=sps_stu_teach, text=province), color='black')+
+   scale_fill_viridis_c(option = "magma", direction=-1)+
+  #scale_fill_continuous_divergingx(palette = "Geyser")+
+  ggthemes::theme_map(base_size=8)+
+  theme(strip.background = element_blank(),
+        legend.position ="bottom",
+        legend.direction = "horizontal",
+        legend.title = element_text(size = 6), 
+        legend.text  = element_text(size = 6),
+        legend.key.size = unit(1, "lines"),
+        plot.title.position = "plot",
+        text=element_text(family= "sans"),
+        plot.title = element_text(face="bold"),
+        plot.subtitle = element_text(face="italic"),
+        plot.caption = element_text(color ="gray30",hjust = 0),
+        axis.title = element_text(face = "bold"))+
+  labs(fill = "Ratio",
+       title = "Student to Teacher Ratio in Integrated ECE",
+   #    subtitle = "Java island has the highest students enrollment in ECE Programs",
+       x="",
+       y="")
+```
+```{r}
+ggplotly(spsratio)
 ```
 
 
