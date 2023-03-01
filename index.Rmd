@@ -4,6 +4,7 @@ output:
   flexdashboard::flex_dashboard:
     orientation: columns
     vertical_layout: fill
+runtime:    shiny
        
 ---
 
@@ -11,23 +12,6 @@ output:
 ```{r setup, include=FALSE}
 pacman::p_load(rio, here, tidyverse, maps, mapdata, ggthemes, ggrepel, rgdal,raster, viridis,sf,terra, colorspace, flexdashboard, plotly,janitor, maptools,ggthemes, viridis)
 ```
-
-
-
-# Overview 
-
-Sidebar Title {.sidebar}
---------------
-
-**General information about ECE Programs in Indonesia**
-
-The First Page of this dashboard contains overall nationwide data about Total number of ECE Programs, total number of students enrolled in all ECE programs, total numbers of ECE Teachers and Facilitators, and total number of classrooms. 
-
-*Data source:*
-Data is taken from the 2020/2021 Annual ECE Statistics Report issued by the Ministry of Education and Cultural. This data reflects ECE Programs statistics in Indonesia as off 30 November 2020.
-
-
--------------
 
 ```{r include=FALSE}
 #Load Province name
@@ -48,7 +32,60 @@ stat <- import(here("data","stat.xlsx")) %>%
 dat <- left_join(idn, stat)
 
 str(stat)
+growth <- import(here("data","growth.xlsx")) %>%
+  pivot_longer(cols=2:11,
+               names_to = "year",
+               values_to = "number")
+        
 ```
+
+
+```{r}
+year <- stat %>% 
+  select(province, all_2017_2018:all_2020_2021, stud_2017_2018:stud_2020_2021, teacher_2017_2018:teacher_2020_2021) %>% 
+  pivot_longer(cols = 2:13, 
+               names_to = c("type", "year"),
+               names_sep = "_",
+               values_to = "number")
+```
+
+
+
+# Overview 
+
+Sidebar Title {.sidebar}
+--------------
+
+**General information about ECE Programs in Indonesia**
+
+The First Page of this dashboard contains overall nationwide data about Total number of ECE Programs, total number of students enrolled in all ECE programs, total numbers of ECE Teachers and Facilitators, and total number of classrooms.
+
+
+```{r include=FALSE}
+longdat<- dat %>% 
+  select(province, long, lat, group, "ECE centers"=institution, "Students"=participants, "Teachers"=teacher_facilitator) %>% 
+  pivot_longer(cols=5:7,
+               names_to = "type", 
+               values_to = "number")
+```
+
+```{r echo=FALSE}
+
+
+ selectInput("data", label = h3("Select Data to Show"), 
+    choices = list("Number of ECE Centers" = "ECE centers", "Number of Students Enrolled" = "Students", "Number of Teachers" = "Teachers"),
+    selected="institution")
+
+selectdata <- reactive(as.character(input$data))
+           
+```
+
+*Data source:*
+Data is taken from the 2020/2021 Annual ECE Statistics Report issued by the Ministry of Education and Cultural. This data reflects ECE Programs statistics in Indonesia as off 30 November 2020.
+
+
+-------------
+
 
 Column {.tabset data-width=700}
 -----------------------------------------
@@ -57,10 +94,14 @@ Column {.tabset data-width=700}
 
 
 
-```{r include=FALSE}
-totece <- dat %>% 
+```{r echo=FALSE}
+#selectdata
+
+renderPlot({
+  longdat %>% 
+   filter(type == selectdata())%>% 
   ggplot(aes(x = long, y = lat, group = group)) +
-  geom_polygon(aes(x=long,y=lat, group=group, fill=institution, text=province), color='black')+
+  geom_polygon(aes(x=long,y=lat, group=group, fill=number, text=province), color='black')+
   scale_fill_continuous_divergingx(palette = "Earth")+
   ggthemes::theme_map(base_size=8)+
   theme(strip.background = element_blank(),
@@ -79,12 +120,10 @@ totece <- dat %>%
        title = "ECE Programs Availability by Province in Indonesia",
        subtitle = "Java islands have the highest number of ECE Programs",
        x="",
-       y="")
-totece
-```
+       y="") 
 
-```{r}
-ggplotly(totece)
+})
+
 ```
 
 
@@ -165,6 +204,7 @@ There are three types of Non-Formal ECE:
 + Integrated ECE *(Satuan Paud Sejenis)* for	0-6 years old
 
 And only one type of Formal ECE
+
 + Kindergarten (Taman Kanak-kanak/ Raudatul Athfal)	for 4-6 years old with priority for 5-6 years old
 
 
@@ -182,12 +222,42 @@ Data is taken from the 2020/2021 Annual ECE Statistics Report issued by the Mini
 -------------
 
 
+
 Column {.tabset data-width=700}
 -----------------------------------------
 
+```{r eval=FALSE, include=FALSE}
+renderPlot ({dat %>% 
+  ggplot(aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(x=long,y=lat, group=group, fill=tk_stu_teacher, text=province), color='black')+
+   scale_fill_viridis_c(option = "magma", direction=-1)+
+  #scale_fill_continuous_divergingx(palette = "Geyser")+
+  ggthemes::theme_map(base_size=8)+
+  theme(strip.background = element_blank(),
+        legend.position ="bottom",
+        legend.direction = "horizontal",
+        legend.title = element_text(size = 6), 
+        legend.text  = element_text(size = 6),
+        legend.key.size = unit(1, "lines"),
+        plot.title.position = "plot",
+        text=element_text(family= "sans"),
+        plot.title = element_text(face="bold"),
+        plot.subtitle = element_text(face="italic"),
+        plot.caption = element_text(color ="gray30",hjust = 0),
+        axis.title = element_text(face = "bold"))+
+  labs(fill = "Ratio",
+       title = "Student to Teacher Ratio in Kindergarten",
+    #   subtitle = "Java island has the highest students enrollment in ECE Programs",
+       x="",
+       y="")
+})
+```
+
+
+
 ### Kindergarten
 
-```{r}
+```{r include=FALSE}
 
 tkratio<- dat %>% 
   ggplot(aes(x = long, y = lat, group = group)) +
@@ -212,11 +282,11 @@ tkratio<- dat %>%
     #   subtitle = "Java island has the highest students enrollment in ECE Programs",
        x="",
        y="")
-tkratio
+
 ```
 
 ```{r}
-
+ggplotly(tkratio)
 ```
 
 ### Daycare
@@ -311,5 +381,93 @@ spsratio<- dat %>%
 ```{r}
 ggplotly(spsratio)
 ```
+
+# Interactive National ECE Programs
+
+Sidebar Title {.sidebar}
+--------------
+
+
+```{r}
+
+selectInput("type", label = h3("Type of ECE Program"), 
+    #choices = unique(growth$type),
+    choices = list("All"="All","Kindergarten" = "Kindergarten", "Playgroup" = "Playgroup","Daycare" = "Daycare","Integrated ECD" = "Integrated ECD"),#c("All","Kindergarten","Playgroup","Daycare","Integrated ECD"),
+    selected = "All")#,
+    #multiple= TRUE)
+
+```
+
+
+-------------
+
+
+Column {.tabset data-width=700}
+-----------------------------------------
+
+### Number of ECE Programs in National level by type
+
+```{r echo=FALSE}
+selecttype <- reactive(as.character(input$type))
+```
+
+
+```{r echo=FALSE}
+renderPlot({
+growth %>% 
+ filter(type %in% selecttype()) %>% 
+  ggplot(aes(year, number, fill= type, color=type))+
+  #geom_bar(stat= "identity", position = "identity",alpha = .1)+
+  geom_point(stat= "identity", position = "identity",alpha = .5, size = 5)+
+  geom_line(aes(year, number, group=type,), size=2)+
+  theme_minimal() 
+  
+})
+```
+
+# Interactive by Province
+
+
+
+Sidebar Title {.sidebar}
+--------------
+
+
+```{r echo=FALSE}
+ selectInput("province", label = h3("Select Province"), 
+    choices = unique(year$province),
+    selected = "DKI Jakarta")
+sliderInput('year', label =h3('Select Year'), min=2017, max=2020,
+            value=min(2017, 2020), step=1, round=0, sep="")
+
+selectprovince <- reactive(as.character(input$province))
+selectyear <- reactive(as.numeric(input$year))
+           
+```
+
+
+
+-------------
+
+
+
+Column {data-width=700}
+-----------------------------------------
+
+### Number of Student enrolled, Teacher, & ECE center by Province from 2017-2020
+
+```{r echo=FALSE}
+
+renderPlot ({year %>% 
+  filter(province == selectprovince(),
+         year <= selectyear()) %>% 
+  ggplot(aes(year, number, fill= type, color=type))+
+  geom_bar(stat= "identity", position = "identity",alpha = .1, width = .2)+
+  geom_point(stat= "identity", position = "identity",alpha = .5, size=5)+
+  geom_line(aes(year, number, group=type), size = 2)+
+  theme_minimal() 
+})
+```
+
 
 
