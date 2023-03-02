@@ -1,16 +1,20 @@
 ---
 title: "The Statistics of Early Childhood Education in Indonesia"
+runtime:    shiny
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
     vertical_layout: fill
-runtime:    shiny
+    theme: readable
+    source_code: embed
+    social: menu
+
        
 ---
 
 
 ```{r setup, include=FALSE}
-pacman::p_load(rio, here, tidyverse, maps, mapdata, ggthemes, ggrepel, rgdal,raster, viridis,sf,terra, colorspace, flexdashboard, plotly,janitor, maptools,ggthemes, viridis,forcats)
+pacman::p_load(rio, here, tidyverse, maps, mapdata, ggthemes, ggrepel, rgdal,raster, viridis,sf,terra, colorspace, flexdashboard, plotly,janitor, maptools,ggthemes, viridis,forcats, shiny)
 ```
 
 ```{r include=FALSE}
@@ -94,16 +98,16 @@ Column {.tabset data-width=700}
 
 ```{r echo=FALSE}
 
-renderPlot({
+renderPlotly({
   longdat %>% 
    filter(type == selectdata1())%>% 
   ggplot(aes(x = long, y = lat, group = group)) +
-  geom_polygon(aes(x=long,y=lat, group=group, fill=number, text=province), color='white')+
+  geom_polygon(aes(x=long,y=lat, group=group, fill=number, text=province), color='gray60')+
   scale_fill_continuous_divergingx(palette = "Earth")+
   ggthemes::theme_map(base_size=8)+
   theme(strip.background = element_blank(),
         legend.position ="bottom",
-        legend.direction = "horizontal",
+     #  legend.direction = "horizontal",
         legend.title = element_text(size = 6), 
         legend.text  = element_text(size = 6),
         legend.key.size = unit(1, "lines"),
@@ -217,13 +221,11 @@ Data is taken from the 2020/2021 Annual ECE Statistics Report issued by the Mini
 
 -------------
 
-
-
 Column {.tabset data-width=700}
 -----------------------------------------
 
 ```{r eval=FALSE, include=FALSE}
-renderPlot ({dat %>% 
+renderPlotly ({dat %>% 
   ggplot(aes(x = long, y = lat, group = group)) +
   geom_polygon(aes(x=long,y=lat, group=group, fill=tk_stu_teacher, text=province), color='black')+
    scale_fill_viridis_c(option = "magma", direction=-1)+
@@ -231,7 +233,7 @@ renderPlot ({dat %>%
   ggthemes::theme_map(base_size=8)+
   theme(strip.background = element_blank(),
         legend.position ="bottom",
-        legend.direction = "horizontal",
+     #   legend.direction = "horizontal",
         legend.title = element_text(size = 6), 
         legend.text  = element_text(size = 6),
         legend.key.size = unit(1, "lines"),
@@ -358,7 +360,7 @@ spsratio<- dat %>%
   ggthemes::theme_map(base_size=8)+
   theme(strip.background = element_blank(),
         legend.position ="bottom",
-        legend.direction = "horizontal",
+     #   legend.direction = "horizontal",
         legend.title = element_text(size = 6), 
         legend.text  = element_text(size = 6),
         legend.key.size = unit(1, "lines"),
@@ -421,13 +423,13 @@ selecttype <- reactive(as.character(input$type))
 
 
 ```{r echo=FALSE}
-renderPlot({
+renderPlotly({
 growth %>% 
  filter(type %in% selecttype()) %>% 
   ggplot(aes(year, number, fill= type, color=type))+
   #geom_bar(stat= "identity", position = "identity",alpha = .1)+
   geom_point(stat= "identity", position = "identity",alpha = .5, size = 5)+
-  geom_line(aes(year, number, group=type,), size=2)+
+  geom_line(aes(year, number,group=type), linewidth=1)+
   theme_minimal() 
   
 })
@@ -480,23 +482,24 @@ Column {data-width=700}
 
 ```{r echo=FALSE}
 
-renderPlot ({year %>% 
+renderPlotly ({year %>% 
   filter(province == selectprovince(),
          year <= selectyear()) %>% 
   ggplot(aes(year, number, fill= type, color=type))+
   geom_bar(stat= "identity", position = "identity",alpha = .1, width = .2)+
-  geom_point(stat= "identity", position = "identity",alpha = .5, size=5)+
-  geom_line(aes(year, number, group=type), size = 2)+
+  geom_point(stat= "identity", position = "identity",alpha = .5, size=3)+
+  geom_line(aes(year, number, group=type), linewidth = 1)+
     scale_color_manual(values=c('#063970', '#A69943', '#7843a6'))+
+    labs(x="",
+         y="")+
   theme_minimal() 
 })
 ```
-
 ### B. Comparison Across Province: Number of Student enrolled, Teacher, & ECE center by Province from 2017-2020
 
 ```{r echo=FALSE}
 
-renderPlot ({
+renderPlotly ({
   year %>% 
   filter(type == selectdata(),
          year == selectyear1())%>% 
