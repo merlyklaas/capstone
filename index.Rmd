@@ -22,7 +22,7 @@ pacman::p_load(rio, here, tidyverse, maps, mapdata, ggthemes, ggrepel, rgdal,ras
 name <- import(here("data", "name.xlsx"))
 name$id <- as.character(name$id)
 #Load Indonesia shapefile
-idn_shape2 <- rgdal::readOGR(dsn=path.expand("/Users/merlyklaas/Documents/University of Oregon/2022-2023/EDLD 655 Capstone/capstone-project/data/smallest/idn_admbnda_adm1_bps_20200401.shp"),layer = "idn_admbnda_adm1_bps_20200401")
+idn_shape2 <- readOGR(here("data","smallest","idn_admbnda_adm1_bps_20200401.shp"))
 st_drivers()
 idn_shape_df <- fortify(idn_shape2)
 head(idn_shape_df)
