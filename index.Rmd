@@ -5,15 +5,16 @@ output:
   flexdashboard::flex_dashboard:
     orientation: columns
     vertical_layout: fill
-  #  theme: readable
-    #source_code: embed
+
+    theme: united
+    source_code: embed
 
        
 ---
 
 
 ```{r setup, include=FALSE}
-pacman::p_load(rio, here, tidyverse, maps, mapdata, ggthemes, ggrepel, rgdal,raster, viridis,sf,terra, colorspace, flexdashboard, plotly,janitor, maptools,ggthemes, viridis,forcats, shiny)
+pacman::p_load(rio, here, tidyverse, maps, mapdata, ggthemes, ggrepel, rgdal,raster, viridis,sf,terra, colorspace, flexdashboard, plotly,janitor, maptools,ggthemes, viridis,forcats, shiny,htmltools)
 ```
 
 ```{r include=FALSE}
@@ -36,18 +37,12 @@ str(stat)
 growth <- import(here("data","growth.xlsx")) %>%
   pivot_longer(cols=2:11,
                names_to = "year",
-               values_to = "number")
+               values_to = "count")
 
 
 ```
 
 
-```{r include=FALSE}
-growth <- import(here("data","growth.xlsx")) %>%
-  pivot_longer(cols=2:11,
-               names_to = "year",
-               values_to = "number")
-```
 
 
 ```{r include=FALSE}
@@ -103,8 +98,7 @@ Data is taken from the 2020/2021 Annual ECE Statistics Report issued by the Mini
 
 Column {.tabset data-width=700}
 -----------------------------------------
-
-### Number of ECE Programs
+###
 
 ```{r echo=FALSE}
 
@@ -112,8 +106,8 @@ renderPlotly({
   longdat %>% 
    filter(type == selectdata1())%>% 
   ggplot(aes(x = long, y = lat, group = group)) +
-  geom_polygon(aes(x=long,y=lat, group=group, fill=count, text=province), color='gray60')+
-  scale_fill_continuous_divergingx(palette = "Earth")+
+  geom_polygon(aes(x=long,y=lat, group=group, fill=count, text=province), color='black')+
+  scale_fill_viridis_c(option = "magma", direction=-1)+
   ggthemes::theme_map(base_size=8)+
     ggtitle(paste("Overview Number of",input$data0, "by Province in Indonesia"))+
   theme(strip.background = element_blank(),
@@ -124,7 +118,7 @@ renderPlotly({
         legend.key.size = unit(1, "lines"),
         plot.title.position = "plot",
         text=element_text(family= "sans"),
-        plot.title = element_text(size=15, color = "#0088A3",face="bold"),
+        plot.title = element_text(size=15, color = "#410A75",face="bold"),
         plot.subtitle = element_text(face="italic"),
         plot.caption = element_text(color ="gray30",hjust = 0),
         axis.title = element_text(face = "bold"))+
@@ -132,69 +126,8 @@ renderPlotly({
        y="") 
 })
 
-
-        
 ```
 
-```{r eval=FALSE, include=FALSE}
-### Students Enrollment
-totstu<- dat %>% 
-  ggplot(aes(x = long, y = lat, group = group)) +
-  geom_polygon(aes(x=long,y=lat, group=group, fill=participants, text=province), color='white')+
-  scale_fill_continuous_divergingx(palette = "Earth")+
-  ggthemes::theme_map(base_size=8)+
-  theme(strip.background = element_blank(),
-       # legend.position ="bottom",
-     #   legend.direction = "horizontal",
-        legend.title = element_text(size = 6), 
-        legend.text  = element_text(size = 6),
-        legend.key.size = unit(1, "lines"),
-        plot.title.position = "plot",
-        text=element_text(family= "sans"),
-        plot.title = element_text(face="bold"),
-        plot.subtitle = element_text(face="italic"),
-        plot.caption = element_text(color ="gray30",hjust = 0),
-        axis.title = element_text(face = "bold"))+
-  labs(fill = "# of Students Enrolled",
-       title = "Early Childhood Students Enrollment in ECE Program  by Province in Indonesia",
-       subtitle = "Java island has the highest students enrollment in ECE Programs",
-       x="",
-       y="")
-```
-```{r eval=FALSE, include=FALSE}
-ggplotly(totstu)
-```
-
-
-```{r eval=FALSE, include=FALSE}
-totteach<- dat %>% 
-  ggplot(aes(x = long, y = lat, group = group)) +
-  geom_polygon(aes(x=long,y=lat, group=group, fill=teacher_facilitator, text=province), color='black')+
-  scale_fill_continuous_divergingx(palette = "Earth")+
-  ggthemes::theme_map(base_size=8)+
-  theme(strip.background = element_blank(),
-      #  legend.position ="bottom",
-     #   legend.direction = "horizontal",
-        legend.title = element_text(size = 6), 
-        legend.text  = element_text(size = 6),
-        legend.key.size = unit(1, "lines"),
-        plot.title.position = "plot",
-        text=element_text(family= "sans"),
-        plot.title = element_text(face="bold"),
-        plot.subtitle = element_text(face="italic"),
-        plot.caption = element_text(color ="gray30",hjust = 0),
-        axis.title = element_text(face = "bold"))+
-  labs(fill = "# of Teacher",
-       title = "Teachers and Facilitors in ECE Program  by Province in Indonesia",
-       subtitle = "Java island has the highest students enrollment in ECE Programs",
-       x="",
-       y="")
-
-```
-
-```{r eval=FALSE, include=FALSE}
-ggplotly(totteach)
-```
 
 # Student to Teacher Ratio
 
@@ -214,7 +147,7 @@ And only one type of Formal ECE
 + Kindergarten for 4-6 years old with priority for 5-6 years old
 
 
-Thus, in Permendikbud 137 year 2014 about National ECE Standards, the government regulates the maximum student per teacher ratio based on children age:
+Permendikbud 137 year 2014 about National ECE Standards regulates the maximum student per teacher ratio based on children age:
 
 + aged 0-2 = 1:4
 + aged 2-4 = 1:8
@@ -272,12 +205,6 @@ ratio %>%
         plot.subtitle = element_text(face="italic"),
         plot.caption = element_text(color ="gray30",hjust = 0),
         axis.title = element_text(face = "bold"))
-
-#  labs(
-   #    title = "ECE Programs Availability by Province in Indonesia",
-  #     subtitle = "Java islands have the highest number of ECE Programs",
-    #  x="",
-    #  y="") 
 
 })
 ```
@@ -339,15 +266,10 @@ class%>%
         legend.key.size = unit(1, "lines"),
         plot.title.position = "plot",
         text=element_text(family= "sans"),
-        plot.title = element_text(size = 15, color = "#FB5D65", face="bold"),
+        plot.title = element_text(size = 15, color = "#991D85", face="bold"),
         plot.subtitle = element_text(face="italic"),
         plot.caption = element_text(color ="gray30",hjust = 0),
         axis.title = element_text(face = "bold"))
-#  labs(
-   #    title = "ECE Programs Availability by Province in Indonesia",
-  #     subtitle = "Java islands have the highest number of ECE Programs",
-    #  x="",
-    #  y="") 
 
 })
 ```
@@ -368,7 +290,8 @@ And only one type of Formal ECE
 
 + Kindergarten (Taman Kanak-kanak/ Raudatul Athfal) for 4-6 years old with priority for 5-6 years old
 
-This page allows you to preview the growth of ECE centers at the national level by type of service offered. 
+*Data source:*
+Data is taken from Annual ECE Statistics Report issued by the Ministry of Education and Cultural year 2011-2020. This data reflects ECE Programs statistics in Indonesia as off 30 November 2020.
 
 ```{r}
 
@@ -398,14 +321,17 @@ selecttype <- reactive(as.character(input$type))
 renderPlotly({
 growth %>% 
  filter(type %in% selecttype()) %>% 
-  ggplot(aes(year, number, fill= type, color=type))+
-  #geom_bar(stat= "identity", position = "identity",alpha = .1)+
-  geom_point(stat= "identity", position = "identity",alpha = .5, size = 5)+
-  geom_line(aes(year, number,group=type), linewidth=1)+
+  ggplot()+
+  geom_point(aes(year, count),stat= "identity", position = "identity",alpha = .5, size = 5,color = "#E3007C")+
+  geom_line(aes(year, count,group=type), color = "#E3007C",linewidth=1)+
   ggtitle(paste("Total number of",input$type, "Program in Indonesia from 2011-2020"))+
-  theme(plot.title = element_text(size = 15, color = "#C5494F", face="bold"),
-        plot.title.position = "plot") + 
-  theme_minimal() 
+  theme(plot.title = element_text(size = 15, color = "#025193", face="bold"),
+        plot.title.position = "plot",
+        legend.position = "none",
+        axis.ticks=element_blank(),
+        panel.background = element_blank(),
+        axis.title.y = element_blank()
+  )
   
 })
 ```
@@ -418,7 +344,7 @@ Sidebar Title {.sidebar data-width=300}
 
 This page is designed to visualize the Provincial Level Data for Number of ECE Program, Students, and Teachers across the year.
 
-**Chart A** is Within-Province visualization. Audience can select specific province and range of year data to preview.
+**Chart A** is the Within-Province visualization. Audience can select specific province and range of year data to preview.
 <!-- In this chart, all three sub-data (Number of ECE center, Students, and Teachers) are included in one chart to allow the audience to compare the trend of growth throughout the year with the selected province. -->
 ```{r echo=FALSE}
  selectInput("province", label =("Select Province"), 
@@ -426,12 +352,13 @@ This page is designed to visualize the Provincial Level Data for Number of ECE P
     selected = "DKI Jakarta")
  
 sliderInput('year', label =('Select Year'), min=2017, max=2020,
-            value=min(2017, 2020), step=1, round=0, sep="")
+            value=2020, sep="")
+
 
 selectprovince <- reactive(as.character(input$province))
 selectyear <- reactive(as.numeric(input$year))
 ```
-**Chart B** is Between-Province visualization. Audience can select specific type of data (Number of ECE center, Students, and Teachers) and year to preview. 
+**Chart B** is the Between-Province visualization. Audience can select specific type of data (Number of ECE center, Students, and Teachers) and year to preview. 
 <!-- In this chart, audience can compare range of the raw numbers of each type of data variable between province.  -->
 ```{r}
 
@@ -450,8 +377,13 @@ selectyear1 <- reactive(as.numeric(input$year1))
 ```
 
 
-Column {data-width=700}
+
+
+
+Column {data-width=300}
 -----------------------------------------
+
+
 
 ### A. Individual Province Data: Number of Student enrolled, Teacher, & ECE center by Province from 2017-2020
 
@@ -459,19 +391,90 @@ Column {data-width=700}
 
 renderPlotly ({year %>% 
   filter(province == selectprovince(),
-         year <= selectyear()) %>% 
+         year <= selectyear(),
+         type == "Student") %>% 
   ggplot(aes(year, number, fill= type, color=type))+
   geom_bar(stat= "identity", position = "identity",alpha = .1, width = .2)+
   geom_point(stat= "identity", position = "identity",alpha = .5, size=3)+
   geom_line(aes(year, number, group=type), linewidth = 1)+
+    facet_wrap(~type)+
   scale_color_manual(name= "",
-                       values=c('#063970', '#A69943', '#7843a6'))+
-    labs(x="",
-         y="")+
-  theme_minimal() 
+                       values="#E3007C")+
+      scale_fill_manual(name= "",
+                       values="#E3007C")+
+    labs(fill="")+
+    theme(plot.title.position = "plot",
+          legend.title=element_blank(),
+             legend.position= "none",
+        axis.ticks=element_blank(),
+        panel.background = element_blank(),
+        axis.title.y = element_blank(),
+        axis.title.x = element_blank())
 })
 
 ```
+
+
+### B 
+
+
+
+
+```{r}
+renderPlotly ({year %>% 
+  filter(province == selectprovince(),
+         year <= selectyear(),
+         type == "ECE Program") %>% 
+  ggplot(aes(year, number, fill= type, color=type))+
+  geom_bar(stat= "identity", position = "identity",alpha = .1, width = .2)+
+  geom_point(stat= "identity", position = "identity",alpha = .5, size=3)+
+  geom_line(aes(year, number, group=type), linewidth = 1)+
+    facet_wrap(~type)+
+  scale_color_manual(name= "",
+                       values='#025193')+
+      scale_fill_manual(name= "",
+                       values='#025193')+
+    labs(fill="")+
+    theme(plot.title.position = "plot",
+          legend.title=element_blank(),
+             legend.position= "none",
+        axis.ticks=element_blank(),
+        panel.background = element_blank(),
+        axis.title.y = element_blank(),
+        axis.title.x = element_blank())
+})
+```
+
+
+### C
+
+```{r echo=FALSE}
+renderPlotly ({year %>% 
+  filter(province == selectprovince(),
+         year <= selectyear(),
+         type == "Teacher") %>% 
+  ggplot(aes(year, number, fill= type, color=type))+
+  geom_bar(stat= "identity", position = "identity",alpha = .1, width = .2)+
+  geom_point(stat= "identity", position = "identity",alpha = .5, size=3)+
+  geom_line(aes(year, number, group=type), linewidth = 1)+
+    facet_wrap(~type)+
+  scale_color_manual(name= "",
+                       values='#00906E')+
+      scale_fill_manual(name= "",
+                       values='#00906E')+
+    labs(fill="")+
+    theme(plot.title.position = "plot",
+          legend.position= "none",
+          legend.title=element_blank(),
+        axis.ticks=element_blank(),
+        panel.background = element_blank(),
+        axis.title.y = element_blank(),
+        axis.title.x = element_blank())
+})
+```
+
+Column {data-width=650}
+-----------------------------------------
 ### B. Comparison Across Province: Number of Student enrolled, Teacher, & ECE center by Province from 2017-2020
 
 ```{r echo=FALSE}
